@@ -75,6 +75,27 @@
     <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- GENERAL CONFIRMATION MODAL (Replaces native confirm()) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-sm p-6 space-y-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl mx-auto">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 id="confirm-modal-title" class="font-extrabold text-slate-900 dark:text-white text-base">Xác nhận thao tác</h3>
+                <p id="confirm-modal-message" class="text-xs text-slate-500 dark:text-slate-400">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            </div>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition">
+                    Hủy bỏ
+                </button>
+                <button onclick="handleConfirmModalAction()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow transition">
+                    Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========================================== -->
     <!-- SCREEN 1: GATEKEEPER PORTAL (LOGIN SCREEN) -->
     <!-- ========================================== -->
@@ -114,7 +135,7 @@
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mã Học Sinh *</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-id-card absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                                    <input type="text" id="gk-student-id" required placeholder="Ví dụ: HS001" 
+                                    <input type="text" id="gk-student-id" required placeholder="Ví dụ: HS001" value="HS001"
                                         class="w-full pl-9 pr-3 py-2.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none uppercase">
                                 </div>
                             </div>
@@ -246,7 +267,7 @@
             </div>
         </header>
 
-        <!-- TEACHER NAVBAR TAB MENU (ABSOLUTELY HIDDEN FOR STUDENTS) -->
+        <!-- TEACHER NAVBAR TAB MENU (HIDDEN FOR STUDENTS) -->
         <nav id="teacher-nav-tabs" class="bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-700 px-4 flex items-center gap-1 shrink-0 overflow-x-auto">
             <button id="tab-btn-creator" onclick="switchTeacherTab('creator')" class="px-4 py-2.5 text-xs font-bold border-b-2 border-brand-600 text-brand-600 dark:text-brand-400 flex items-center gap-2 transition whitespace-nowrap">
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -298,9 +319,6 @@
                                 </button>
                                 <button onclick="addQuestion('fill_blank')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
                                     <i class="fa-solid fa-pen-line text-amber-500"></i> Điền vào chỗ trống
-                                </button>
-                                <button onclick="addQuestion('short_answer')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
-                                    <i class="fa-solid fa-align-left text-blue-500"></i> Tự luận ngắn
                                 </button>
                             </div>
                         </div>
@@ -414,7 +432,7 @@
                         </div>
                     </div>
 
-                    <!-- Toolbar & Actions (INCLUDES THE NEW GOOGLE SHEET SYNC BUTTON) -->
+                    <!-- Toolbar & Actions -->
                     <div class="bg-white dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                             
@@ -433,8 +451,8 @@
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2">
-                                <button onclick="syncStudentsFromGoogleSheet()" class="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5" title="Tải danh sách tài khoản học sinh từ Google Sheet">
-                                    <i class="fa-solid fa-rotate"></i> 🔄 Đồng bộ từ Google Sheet
+                                <button id="btn-sync-gsheet-students" onclick="syncStudentsFromGoogleSheet()" class="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5" title="Tải danh sách học sinh từ Google Sheet qua doGet">
+                                    <i id="icon-sync-gsheet-students" class="fa-solid fa-rotate"></i> 🔄 Đồng bộ từ Google Sheet
                                 </button>
 
                                 <button onclick="openAddStudentModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
@@ -449,11 +467,11 @@
                                     <i class="fa-solid fa-file-export text-blue-500"></i> Xuất CSV
                                 </button>
 
-                                <button onclick="resetDemoStudents()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                                <button onclick="confirmResetDemoStudents()" class="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-rotate-left text-amber-500"></i> Nạp mẫu
                                 </button>
 
-                                <button onclick="clearAllStudents()" class="px-2.5 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 font-bold text-xs rounded-xl transition">
+                                <button onclick="confirmClearAllStudents()" class="px-2.5 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 font-bold text-xs rounded-xl transition">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
@@ -562,22 +580,6 @@
                             </div>
                         </div>
 
-                        <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700 text-xs">
-                            <label class="flex items-center justify-between cursor-pointer">
-                                <span class="font-bold text-slate-700 dark:text-slate-300">Xáo trộn câu hỏi khi làm bài</span>
-                                <input type="checkbox" id="shuffle-questions-toggle" 
-                                    onchange="updateTestSetting('shuffleQuestions', this.checked)"
-                                    class="w-4 h-4 text-brand-600 rounded border-slate-300">
-                            </label>
-
-                            <label class="flex items-center justify-between cursor-pointer">
-                                <span class="font-bold text-slate-700 dark:text-slate-300">Xáo trộn vị trí phương án</span>
-                                <input type="checkbox" id="shuffle-options-toggle" 
-                                    onchange="updateTestSetting('shuffleOptions', this.checked)"
-                                    class="w-4 h-4 text-brand-600 rounded border-slate-300">
-                            </label>
-                        </div>
-
                         <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-3">
                             <button onclick="exportJSON()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-download"></i> Xuất JSON Đề thi
@@ -628,7 +630,7 @@
 
         </div>
 
-        <!-- VIEW 2: STUDENT EXAM PORTAL (STUDENT ONLY DASHBOARD) -->
+        <!-- VIEW 2: STUDENT EXAM PORTAL (STUDENT DASHBOARD) -->
         <div id="student-portal-view" class="hidden flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 dark:bg-slate-900">
             <div class="max-w-3xl mx-auto space-y-6">
                 
@@ -636,7 +638,7 @@
                     <div class="space-y-2 text-center sm:text-left">
                         <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-extrabold uppercase tracking-wider">Cổng Thi Trực Tuyến</span>
                         <h2 id="student-welcome-title" class="text-2xl font-extrabold">Chào mừng Học sinh!</h2>
-                        <p class="text-xs text-emerald-100">Hãy kiểm tra kỹ thông tin đề thi bên dưới trước khi bắt đầu tính giờ.</p>
+                        <p class="text-xs text-emerald-100">Hãy kiểm tra kỹ thông tin đề thi bên dưới trước khi bắt đầu làm bài.</p>
                     </div>
 
                     <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl shrink-0">
@@ -786,6 +788,64 @@
                 <input type="hidden" id="student-edit-index" value="-1">
 
                 <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mã Học Sinh *</label>
+                    <input type="text" id="form-student-id" required placeholder="Ví dụ: HS006" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-bold uppercase outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Họ và Tên *</label>
+                    <input type="text" id="form-student-name" required placeholder="Nguyễn Văn A" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-bold outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Lớp *</label>
+                        <input type="text" id="form-student-class" required placeholder="12A1" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-bold uppercase outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mật Khẩu *</label>
+                        <input type="text" id="form-student-pass" required placeholder="123456" value="123456" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-mono font-bold outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold rounded-xl">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow">Lưu Thông Tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: BATCH CSV IMPORT STUDENT -->
+    <div id="student-batch-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Nhập Danh Sách Học Sinh Hàng Loạt</h3>
+                <button onclick="closeBatchStudentModal()" class="text-slate-400 hover:text-slate-600 text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-6 space-y-4 text-xs">
+                <p class="text-slate-500">Nhập danh sách theo định dạng CSV (Mã_HS, Họ_và_Tên, Lớp, Mật_Khẩu) mỗi dòng 1 học sinh:</p>
+
+                <textarea id="batch-student-input" rows="6" 
+                    placeholder="HS006, Nguyễn Thị Mai, 12A1, 123456&#10;HS007, Trần Hoàng Nam, 12A2, 123456"
+                    class="w-full p-3 font-mono rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 outline-none"></textarea>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="downloadCSVTemplate()" class="text-brand-600 font-bold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-download"></i> Tải file mẫu CSV
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="closeBatchStudentModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 font-bold rounded-xl">Hủy</button>
+                        <button onclick="processBatchStudents()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow">Tiến Hành Nhập</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL 3: GOOGLE APPS SCRIPT INSTRUCTIONS & CODE TEMPLATE -->
     <div id="gscript-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -800,11 +860,15 @@
                 <ol class="list-decimal pl-4 space-y-2 font-medium">
                     <li>Mở file Google Sheet của bạn trên Google Drive (Tạo 2 tab: <code>DanhSachHocSinh</code> và <code>KetQuaBaiThi</code>).</li>
                     <li>Vào menu: <strong>Tiện ích mở rộng (Extensions)</strong> &rarr; <strong>Apps Script</strong>.</li>
-                    <li>Xóa toàn bộ mã cũ và dán đoạn mã bên dưới vào biên tập viên:</li>
+                    <li>Xóa toàn bộ mã cũ và dán đoạn mã bên dưới vào trình biên tập:</li>
                 </ol>
 
                 <div class="relative group">
-                    <pre id="gscript-code-block" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">// 1. Tải danh sách Học sinh từ Google Sheet về WebApp (dùng cho Đăng nhập & Đồng bộ)
+                    <pre id="gscript-code-block" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">// ==========================================
+// GOOGLE APPS SCRIPT: EDULOGIC TEST STUDIO
+// ==========================================
+
+// 1. HÀM GET: Tải danh sách Học sinh về WebApp
 function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("DanhSachHocSinh") || ss.getSheets()[0];
@@ -813,12 +877,15 @@ function doGet(e) {
   
   for (var i = 1; i < data.length; i++) {
     if (data[i][0]) {
+      var passVal = String(data[i][3]).trim();
+      var isFirstLoginVal = data[i][4];
+      
       students.push({
-        id: String(data[i][0]).trim().toUpperCase(),
+        code: String(data[i][0]).trim(),
         name: String(data[i][1]).trim(),
-        class: String(data[i][2]).trim(),
-        pass: String(data[i][3]).trim(),
-        isFirstLogin: data[i][4] !== undefined ? Boolean(data[i][4]) : (String(data[i][3]).trim() === '123456')
+        className: String(data[i][2]).trim(),
+        pass: passVal,
+        isFirstLogin: isFirstLoginVal === true || String(isFirstLoginVal).toLowerCase() === "true" || passVal === "123456"
       });
     }
   }
@@ -827,54 +894,67 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// 2. Xử lý lưu kết quả thi & cập nhật mật khẩu học sinh
+// 2. HÀM POST: Phân loại Ghi Điểm Thi hoặc Cập nhật Mật khẩu
 function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var data = JSON.parse(e.postData.contents);
-    var action = data.action || 'saveExamResult';
+    var payload = JSON.parse(e.postData.contents);
+    var action = payload.action;
 
-    // ACTION A: Cập nhật mật khẩu mới của Học sinh vào Sheet DanhSachHocSinh
-    if (action === 'updateStudentPass') {
+    // --- TRƯỜNG HỢP A: ĐỔI/RESET MẬT KHẨU HỌC SINH ---
+    if (action === "updateStudentPass") {
       var sheet = ss.getSheetByName("DanhSachHocSinh") || ss.getSheets()[0];
-      var values = sheet.getDataRange().getValues();
-      var targetId = String(data.studentId).trim().toUpperCase();
+      var data = sheet.getDataRange().getValues();
+      var targetCode = String(payload.studentCode || payload.code || payload.studentId).trim().toUpperCase();
+      var newPass = String(payload.newPassword || payload.pass).trim();
+      var isReset = payload.isReset === true;
       var updated = false;
 
-      for (var i = 1; i < values.length; i++) {
-        if (String(values[i][0]).trim().toUpperCase() === targetId) {
-          sheet.getRange(i + 1, 4).setValue(data.newPassword); // Cột D: Mật khẩu
-          sheet.getRange(i + 1, 5).setValue(false);              // Cột E: isFirstLogin (false)
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim().toUpperCase() === targetCode) {
+          sheet.getRange(i + 1, 4).setValue(newPass);
+          sheet.getRange(i + 1, 5).setValue(isReset ? true : false);
           updated = true;
           break;
         }
       }
-      return ContentService.createTextOutput(JSON.stringify({status: "success", updated: updated}))
-        .setMimeType(ContentService.MimeType.JSON);
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: updated ? "success" : "error", 
+        message: updated ? "Cập nhật mật khẩu thành công" : "Không tìm thấy Mã HS"
+      })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // ACTION B: Lưu kết quả làm bài vào Sheet KetQuaBaiThi
-    var sheetResults = ss.getSheetByName("KetQuaBaiThi");
-    if (!sheetResults) {
-      sheetResults = ss.insertSheet("KetQuaBaiThi");
-      sheetResults.appendRow(["Thời gian nộp", "Mã Học Sinh", "Họ và Tên", "Lớp", "Tên Bài Thi", "Điểm Số", "Tỷ Lệ (%)", "Trạng Thái"]);
+    // --- TRƯỜNG HỢP B: LƯU KẾT QUẢ BÀI THI ---
+    else if (action === "saveExamResult" || !action) {
+      var sheetResults = ss.getSheetByName("KetQuaBaiThi");
+      if (!sheetResults) {
+        sheetResults = ss.insertSheet("KetQuaBaiThi");
+        sheetResults.appendRow(["Thời gian nộp", "Mã HS", "Họ và Tên", "Lớp", "Tên Bài Thi", "Điểm Số", "Tỷ Lệ (%)", "Trạng Thái"]);
+      }
+
+      sheetResults.appendRow([
+        payload.submitTime || payload.timestamp || new Date().toLocaleString("vi-VN"),
+        payload.studentCode || payload.studentId || "",
+        payload.studentName || "",
+        payload.studentClass || "",
+        payload.testTitle || "",
+        (payload.score || 0) + " / " + (payload.totalPoints || 10),
+        (payload.percentage || 0) + "%",
+        payload.status || (payload.passed ? "ĐẠT" : "CHƯA ĐẠT")
+      ]);
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success", 
+        message: "Đã ghi kết quả bài thi thành công"
+      })).setMimeType(ContentService.MimeType.JSON);
     }
-    
-    sheetResults.appendRow([
-      data.timestamp || new Date().toLocaleString("vi-VN"),
-      data.studentId || "N/A",
-      data.studentName || "Thí sinh Khách",
-      data.studentClass || "N/A",
-      data.testTitle || "Bài Thi",
-      data.score + " / " + data.totalPoints,
-      data.percentage + "%",
-      data.status
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: "Hành động không hợp lệ"}))
       .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.toString()}))
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }</pre>
@@ -884,9 +964,14 @@ function doPost(e) {
                 </div>
 
                 <ol start="4" class="list-decimal pl-4 space-y-2 font-medium">
-                    <li>Nhấn nút <strong>Triển khai (Deploy)</strong> &rarr; <strong>Triển khai dưới dạng ứng dụng web (New deployment)</strong>.</li>
-                    <li>Tại mục <strong>Ai có quyền truy cập (Who has access)</strong>: Chọn <strong>Bất kỳ ai (Anyone)</strong>.</li>
-                    <li>Nhấn **Triển khai**, cấp quyền kết nối và sao chép **URL ứng dụng web (Web App URL)** dán vào ô cài đặt trong EduLogic Studio.</li>
+                    <li>Nhấn <strong>Triển khai (Deploy)</strong> &rarr; <strong>Quản lý các lượt triển khai (Manage deployments)</strong>.</li>
+                    <li>Tạo phiên bản mới (New version) và thiết lập:
+                        <ul class="list-disc pl-5 mt-1 space-y-1">
+                            <li><strong>Thực thi dưới dạng (Execute as)</strong>: <em>Tôi (Me)</em>.</li>
+                            <li><strong>Ai có quyền truy cập (Who has access)</strong>: <em>Bất kỳ ai (Anyone)</em>.</li>
+                        </ul>
+                    </li>
+                    <li>Sao chép **Web App URL** dán vào ô Cài Đặt ở Tab 4 của EduLogic.</li>
                 </ol>
             </div>
 
@@ -904,7 +989,7 @@ function doPost(e) {
                     <i class="fa-solid fa-key"></i>
                 </div>
                 <h3 class="font-extrabold text-slate-900 dark:text-white text-xl">Đổi Mật Khẩu Lần Đầu</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Vì lý do bảo mật, vui lòng tạo mật khẩu mới cho tài khoản của bạn trước khi làm bài thi.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Vì lý do bảo mật, bạn cần tạo mật khẩu mới cho tài khoản trước khi vào làm bài thi.</p>
             </div>
 
             <form onsubmit="handleConfirmFirstPasswordChange(event)" class="space-y-4 pt-2 text-xs">
@@ -954,7 +1039,7 @@ function doPost(e) {
     <!-- JAVASCRIPT APP ENGINE -->
     <script>
         // ==========================================
-        // 1. DEFAULT DATASETS
+        // 1. DEFAULT DATASETS (AUTO-SEED GUARANTEED)
         // ==========================================
 
         const DEFAULT_STUDENTS = [
@@ -976,7 +1061,7 @@ function doPost(e) {
                     id: "q_sample_1",
                     type: "single",
                     title: "Thủ đô chính thức của Việt Nam là thành phố nào?",
-                    points: 2,
+                    points: 2.5,
                     explanation: "Hà Nội là thủ đô của Nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.",
                     hint: "Thành phố thuộc vùng đồng bằng sông Hồng.",
                     options: [
@@ -990,7 +1075,7 @@ function doPost(e) {
                     id: "q_sample_2",
                     type: "multiple",
                     title: "Những số nào dưới đây là số nguyên tố?",
-                    points: 2,
+                    points: 2.5,
                     explanation: "Số 2 và số 3 chỉ chia hết cho 1 và chính nó.",
                     hint: "Số 2 là số nguyên tố chẵn duy nhất.",
                     options: [
@@ -1004,7 +1089,7 @@ function doPost(e) {
                     id: "q_sample_3",
                     type: "true_false",
                     title: "Tổng hai số lẻ bất kỳ luôn luôn là một số chẵn.",
-                    points: 1,
+                    points: 2.5,
                     explanation: "Đúng. (2k+1) + (2m+1) = 2(k+m+1) chia hết cho 2.",
                     hint: "Hãy thử tính 3 + 5.",
                     options: [
@@ -1015,8 +1100,8 @@ function doPost(e) {
                 {
                     id: "q_sample_4",
                     type: "fill_blank",
-                    title: "Nếu một hình vuông có chu vi 36cm thì diện tích của nó là ____ cm².",
-                    points: 2,
+                    title: "Nếu một hình vuông có chu vi 36cm thì diện tích của nó là bao nhiêu cm²?",
+                    points: 2.5,
                     explanation: "Cạnh = 36/4 = 9cm -> Diện tích = 9 x 9 = 81cm².",
                     hint: "Tính cạnh trước bằng chu vi chia 4.",
                     correctAnswer: "81"
@@ -1025,11 +1110,11 @@ function doPost(e) {
         };
 
         // ==========================================
-        // 2. APP STATE VARIABLES
+        // 2. APP STATE VARIABLES & INITIALIZATION
         // ==========================================
         let authRole = 'none'; // 'none', 'student', 'teacher', 'guest'
         let currentStudent = JSON.parse(localStorage.getItem('edulogic_active_student')) || null;
-        let studentsDB = JSON.parse(localStorage.getItem('edulogic_students_db')) || JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+        let studentsDB = [];
         let currentTest = JSON.parse(localStorage.getItem('edulogic_test')) || JSON.parse(JSON.stringify(SAMPLE_TEST));
         let gscriptURL = localStorage.getItem('edulogic_gscript_url') || '';
         let examHistory = JSON.parse(localStorage.getItem('edulogic_exam_history')) || [];
@@ -1043,11 +1128,11 @@ function doPost(e) {
         let examTimeRemaining = 0;
         let examStartTime = 0;
         let parsedImportQuestions = [];
+        let pendingConfirmAction = null;
 
-        // ==========================================
-        // 3. INITIALIZATION & STORAGE SYNCS
-        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
+            initAutoSeedStudents();
+
             if (localStorage.getItem('edulogic_dark') === 'true') {
                 document.documentElement.classList.add('dark');
             }
@@ -1061,10 +1146,30 @@ function doPost(e) {
                 });
             }
 
-            syncStudentsToStorage();
             renderGatekeeperPresets();
             updateGScriptUI();
         });
+
+        // AUTO-SEED: Ensure default students exist immediately on load
+        function initAutoSeedStudents() {
+            const raw = localStorage.getItem('edulogic_students_db');
+            if (!raw || JSON.parse(raw).length === 0) {
+                studentsDB = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+                syncStudentsToStorage();
+            } else {
+                studentsDB = JSON.parse(raw);
+            }
+
+            // Normalize fields
+            studentsDB.forEach(s => {
+                s.id = (s.id || '').toString().trim().toUpperCase();
+                s.pass = (s.pass || '123456').toString().trim();
+                if (s.isFirstLogin === undefined) {
+                    s.isFirstLogin = (s.pass === '123456');
+                }
+            });
+            syncStudentsToStorage();
+        }
 
         function triggerAutoSave() {
             localStorage.setItem('edulogic_test', JSON.stringify(currentTest));
@@ -1077,6 +1182,30 @@ function doPost(e) {
         }
 
         // ==========================================
+        // 3. CONFIRMATION MODAL SYSTEM (REPLACES ALERT/CONFIRM)
+        // ==========================================
+
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-message').textContent = message;
+            pendingConfirmAction = onConfirm;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function handleConfirmModalAction() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (typeof pendingConfirmAction === 'function') {
+                pendingConfirmAction();
+                pendingConfirmAction = null;
+            }
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            pendingConfirmAction = null;
+        }
+
+        // ==========================================
         // 4. GOOGLE SHEET INTEGRATION MODULE
         // ==========================================
 
@@ -1085,7 +1214,7 @@ function doPost(e) {
             gscriptURL = url;
             localStorage.setItem('edulogic_gscript_url', url);
             updateGScriptUI();
-            showToast(url ? "Đã lưu kết nối Google Sheet URL!" : "Đã hủy bỏ liên kết Google Sheet", url ? "success" : "info");
+            showToast(url ? "Đã lưu kết nối Google Sheet URL!" : "Đã hủy liên kết Google Sheet", url ? "success" : "info");
         }
 
         function updateGScriptUI() {
@@ -1162,6 +1291,7 @@ function doPost(e) {
                         const name = (item.name || item.ho_ten || '').toString().trim();
                         const className = (item.className || item.class || item.lop || '12A1').toString().trim();
                         const pass = (item.pass || item.mat_khau || '123456').toString().trim();
+                        const isFirst = item.isFirstLogin !== undefined ? Boolean(item.isFirstLogin) : (pass === '123456');
 
                         if (id && name) {
                             const existingIdx = studentsDB.findIndex(s => s.id === id);
@@ -1170,6 +1300,7 @@ function doPost(e) {
                                 name,
                                 class: className,
                                 pass,
+                                isFirstLogin: isFirst,
                                 avatar: `https://placehold.co/100x100/10b981/ffffff?text=${encodeURIComponent(name.substring(0,2).toUpperCase())}`
                             };
 
@@ -1193,18 +1324,18 @@ function doPost(e) {
 
                     showToast(`Đồng bộ thành công ${updatedCount} học sinh từ Google Sheet!`, "success");
                 } else {
-                    showToast("Google Sheet trả về danh sách trống hoặc không đúng định dạng!", "warning");
+                    showToast("Google Sheet trả về danh sách trống hoặc không đúng cấu trúc JSON!", "warning");
                 }
             } catch (err) {
                 console.error("Lỗi tải danh sách từ Google Sheet:", err);
-                showToast("Không thể tải danh sách từ Google Sheet. Hãy kiểm tra lại quyền truy cập Web App (Anyone)!", "error");
+                showToast("Không thể tải dữ liệu từ Google Sheet. Kiểm tra lại quyền Anyone trên Web App!", "error");
             } finally {
                 if (btn) btn.disabled = false;
                 if (icon) icon.classList.remove('animate-spin');
             }
         }
 
-        // SEND EXAM RESULTS TO GOOGLE SHEET (doPost)
+        // SEND POST PAYLOAD TO GOOGLE SHEET
         async function sendPayloadToGoogleSheet(payload) {
             if (!gscriptURL || !gscriptURL.startsWith('http')) {
                 return { success: false, reason: "NO_URL" };
@@ -1233,27 +1364,29 @@ function doPost(e) {
             showToast("Đang thử gửi dữ liệu về Google Sheet...", "info");
 
             const demoPayload = {
-                timestamp: new Date().toISOString(),
-                studentId: "DEMO999",
+                action: "saveExamResult",
+                submitTime: new Date().toLocaleString("vi-VN"),
+                studentCode: "HS001",
                 studentName: "Học Sinh Thử Nghiệm",
                 studentClass: "12A1",
-                testTitle: currentTest.title + " (Test Connection)",
+                testTitle: currentTest.title + " (Thử kết nối)",
                 score: 10,
                 totalPoints: 10,
                 percentage: 100,
+                passed: true,
                 status: "KẾT NỐI THÀNH CÔNG"
             };
 
             const res = await sendPayloadToGoogleSheet(demoPayload);
             if (res.success) {
-                showToast("Đã phát yêu cầu gửi dữ liệu thử về Google Sheet thành công!", "success");
+                showToast("Đã phát yêu cầu gửi dữ liệu thử về Google Sheet!", "success");
             } else {
                 showToast("Lỗi kết nối: " + res.reason, "error");
             }
         }
 
         // ==========================================
-        // 5. GATEKEEPER & CONTROLLER
+        // 5. GATEKEEPER & CONTROLLER (CASE-INSENSITIVE LOGIN)
         // ==========================================
 
         let pendingChangePassStudent = null;
@@ -1276,13 +1409,19 @@ function doPost(e) {
         }
 
         function handleStudentPortalLogin(e) {
-            e.preventDefault();
-            const id = document.getElementById('gk-student-id').value.trim().toUpperCase();
-            const pass = document.getElementById('gk-student-pass').value.trim();
+            if (e) e.preventDefault();
+            const idInput = (document.getElementById('gk-student-id').value || '').trim().toUpperCase();
+            const passInput = (document.getElementById('gk-student-pass').value || '').trim();
 
-            const found = studentsDB.find(s => s.id === id && s.pass === pass);
+            if (!idInput || !passInput) {
+                showToast("Vui lòng nhập đầy đủ Mã số học sinh và Mật khẩu!", "warning");
+                return;
+            }
+
+            const found = studentsDB.find(s => s.id.toUpperCase() === idInput && s.pass === passInput);
+
             if (found) {
-                // Kiểm tra nếu đăng nhập lần đầu hoặc mật khẩu đang là '123456'
+                // Mandatory first-time change password check
                 if (found.isFirstLogin || found.pass === '123456') {
                     pendingChangePassStudent = found;
                     document.getElementById('new-first-pass').value = '';
@@ -1297,7 +1436,7 @@ function doPost(e) {
                 showToast(`Đăng nhập thành công! Thí sinh: ${found.name}`, "success");
                 enterMainAppScreen();
             } else {
-                showToast("Mã học sinh hoặc Mật khẩu không chính xác!", "error");
+                showToast("Mã HS hoặc mật khẩu không chính xác! (Tài khoản mẫu: HS001 / 123456)", "error");
             }
         }
 
@@ -1327,12 +1466,13 @@ function doPost(e) {
 
                 syncStudentsToStorage();
 
-                // Gửi cập nhật mật khẩu về Google Sheet qua API
+                // Dispatch POST request to Apps Script if URL is configured
                 if (gscriptURL && gscriptURL.startsWith('http')) {
                     sendPayloadToGoogleSheet({
                         action: 'updateStudentPass',
-                        studentId: pendingChangePassStudent.id,
-                        newPassword: newPass
+                        studentCode: pendingChangePassStudent.id,
+                        newPassword: newPass,
+                        isReset: false
                     });
                 }
 
@@ -1341,7 +1481,7 @@ function doPost(e) {
                 localStorage.setItem('edulogic_active_student', JSON.stringify(pendingChangePassStudent));
 
                 document.getElementById('change-password-modal').classList.add('hidden');
-                showToast("Đã đổi mật khẩu thành công & cập nhật lên Google Sheet!", "success");
+                showToast("Đã đổi mật khẩu thành công! Chào mừng bạn vào bài thi.", "success");
                 pendingChangePassStudent = null;
                 enterMainAppScreen();
             }
@@ -1483,7 +1623,7 @@ function doPost(e) {
             const newQ = {
                 id, type,
                 title: "Nội dung câu hỏi mới...",
-                points: 1,
+                points: 2.5,
                 explanation: "",
                 hint: ""
             };
@@ -1516,11 +1656,15 @@ function doPost(e) {
                 showToast("Đề thi cần có ít nhất 1 câu hỏi!", "warning");
                 return;
             }
-            currentTest.questions = currentTest.questions.filter(q => q.id !== id);
-            if (activeQuestionId === id) activeQuestionId = currentTest.questions[0].id;
-            renderSidebar();
-            renderMainWorkspace();
-            triggerAutoSave();
+
+            showConfirmModal("Xóa câu hỏi", "Bạn có chắc chắn muốn xóa câu hỏi này khỏi đề thi?", () => {
+                currentTest.questions = currentTest.questions.filter(q => q.id !== id);
+                if (activeQuestionId === id) activeQuestionId = currentTest.questions[0].id;
+                renderSidebar();
+                renderMainWorkspace();
+                triggerAutoSave();
+                showToast("Đã xóa câu hỏi!", "info");
+            });
         }
 
         function selectQuestion(id) {
@@ -1675,14 +1819,14 @@ function doPost(e) {
                     currentQ = {
                         id: 'parsed_' + Date.now() + '_' + Math.random().toString(36).substring(2,4),
                         title: qMatch[3] || line,
-                        points: qMatch[2] ? parseFloat(qMatch[2]) : 1,
+                        points: qMatch[2] ? parseFloat(qMatch[2]) : 2.5,
                         options: [], explanation: "", hint: "", selectedForImport: true
                     };
                     return;
                 }
 
                 if (!currentQ) {
-                    currentQ = { id: 'parsed_' + Date.now(), title: line, points: 1, options: [], selectedForImport: true };
+                    currentQ = { id: 'parsed_' + Date.now(), title: line, points: 2.5, options: [], selectedForImport: true };
                     return;
                 }
 
@@ -1740,7 +1884,7 @@ function doPost(e) {
                     id: 'q_' + Date.now() + '_' + Math.random().toString(36).substring(2,4),
                     type: sq.type,
                     title: sq.title,
-                    points: sq.points || 1,
+                    points: sq.points || 2.5,
                     explanation: sq.explanation || '',
                     hint: sq.hint || '',
                     options: sq.options.map(o => ({ id: o.id, text: o.text, isCorrect: o.isCorrect }))
@@ -1752,65 +1896,12 @@ function doPost(e) {
             renderMainWorkspace();
             triggerAutoSave();
             switchTeacherTab('creator');
-            showToast(`Đã nạp ${parsedImportQuestions.length} câu hỏi vào đề!`, "success");
+            showToast(`Đã nạp ${parsedImportQuestions.length} câu hỏi vào đề thi!`, "success");
         }
 
         // ==========================================
         // 9. STUDENT MANAGEMENT MODULE
         // ==========================================
-
-        async function syncStudentsFromGoogleSheet() {
-            if (!gscriptURL || !gscriptURL.startsWith('http')) {
-                showToast("Vui lòng gắn URL Google Apps Script ở Tab 4 trước!", "warning");
-                return;
-            }
-
-            showToast("Đang tải danh sách học sinh từ Google Sheet...", "info");
-
-            try {
-                const res = await fetch(gscriptURL);
-                const data = await res.json();
-
-                if (Array.isArray(data) && data.length > 0) {
-                    let importedCount = 0;
-                    data.forEach(item => {
-                        const sId = (item.id || item.code || item.ma_hs || '').toString().trim().toUpperCase();
-                        const sName = (item.name || item.ho_ten || '').toString().trim();
-                        const sClass = (item.class || item.className || item.lop || '12A1').toString().trim();
-                        const sPass = (item.pass || item.mat_khau || '123456').toString().trim();
-                        const isFirst = item.isFirstLogin !== undefined ? Boolean(item.isFirstLogin) : (sPass === '123456');
-
-                        if (sId && sName) {
-                            const existingIdx = studentsDB.findIndex(s => s.id === sId);
-                            const studentObj = {
-                                id: sId,
-                                name: sName,
-                                class: sClass,
-                                pass: sPass,
-                                isFirstLogin: isFirst,
-                                avatar: `https://placehold.co/100x100/4f46e5/ffffff?text=${encodeURIComponent(sName.substring(0,2).toUpperCase())}`
-                            };
-
-                            if (existingIdx !== -1) {
-                                studentsDB[existingIdx] = studentObj;
-                            } else {
-                                studentsDB.push(studentObj);
-                                importedCount++;
-                            }
-                        }
-                    });
-
-                    syncStudentsToStorage();
-                    renderStudentsTable();
-                    showToast(`Đã đồng bộ ${data.length} học sinh từ Google Sheet!`, "success");
-                } else {
-                    showToast("Không tìm thấy dữ liệu học sinh trong sheet DanhSachHocSinh", "warning");
-                }
-            } catch (err) {
-                console.error("Sync Error:", err);
-                showToast("Lỗi kết nối tải dữ liệu từ Google Sheet!", "error");
-            }
-        }
 
         function renderStudentsTable() {
             const tbody = document.getElementById('students-table-body');
@@ -1849,7 +1940,7 @@ function doPost(e) {
                     tr.innerHTML = `
                         <td class="py-3 px-4 font-bold text-brand-600 dark:text-brand-400 uppercase flex items-center gap-1.5">
                             ${s.id}
-                            ${s.isFirstLogin ? '<span class="w-2 h-2 rounded-full bg-amber-500" title="Chưa đổi mật khẩu lần đầu"></span>' : ''}
+                            ${s.isFirstLogin ? '<span class="w-2 h-2 rounded-full bg-amber-500" title="Cần đổi mật khẩu lần đầu"></span>' : ''}
                         </td>
                         <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                             <img src="${s.avatar || 'https://placehold.co/100x100/4f46e5/ffffff?text=HS'}" class="w-7 h-7 rounded-full object-cover">
@@ -1875,29 +1966,33 @@ function doPost(e) {
             }
         }
 
-        async function resetStudentPassword(idx) {
+        function resetStudentPassword(idx) {
             const s = studentsDB[idx];
             if (!s) return;
 
-            if (confirm(`Bạn có chắc chắn muốn RESET mật khẩu của học sinh "${s.name}" (${s.id}) về mặc định "123456"?`)) {
-                s.pass = '123456';
-                s.isFirstLogin = true;
+            showConfirmModal(
+                "Reset Mật Khẩu", 
+                `Bạn có chắc chắn muốn RESET mật khẩu của "${s.name}" (${s.id}) về mặc định "123456"?`, 
+                () => {
+                    s.pass = '123456';
+                    s.isFirstLogin = true;
 
-                syncStudentsToStorage();
-                renderStudentsTable();
+                    syncStudentsToStorage();
+                    renderStudentsTable();
 
-                // Đồng bộ thay đổi mật khẩu về Google Sheet
-                if (gscriptURL && gscriptURL.startsWith('http')) {
-                    sendPayloadToGoogleSheet({
-                        action: 'updateStudentPass',
-                        studentId: s.id,
-                        newPassword: '123456'
-                    });
-                    showToast(`Đã reset mật khẩu ${s.id} về 123456 & đồng bộ lên Google Sheet!`, "success");
-                } else {
-                    showToast(`Đã reset mật khẩu ${s.id} về 123456 trong LocalStorage!`, "info");
+                    if (gscriptURL && gscriptURL.startsWith('http')) {
+                        sendPayloadToGoogleSheet({
+                            action: 'updateStudentPass',
+                            studentCode: s.id,
+                            newPassword: '123456',
+                            isReset: true
+                        });
+                        showToast(`Đã reset mật khẩu ${s.id} về 123456 & cập nhật Google Sheet!`, "success");
+                    } else {
+                        showToast(`Đã reset mật khẩu ${s.id} về 123456 trong LocalStorage!`, "info");
+                    }
                 }
-            }
+            );
         }
 
         function togglePassVisibility(idx, passValue) {
@@ -1947,6 +2042,7 @@ function doPost(e) {
 
             const studentObj = {
                 id, name, class: className, pass,
+                isFirstLogin: pass === '123456',
                 avatar: `https://placehold.co/100x100/4f46e5/ffffff?text=${encodeURIComponent(name.substring(0,2).toUpperCase())}`
             };
 
@@ -1964,28 +2060,32 @@ function doPost(e) {
         }
 
         function deleteStudent(idx) {
-            if (confirm(`Bạn có chắc chắn muốn xóa học sinh ${studentsDB[idx]?.name}?`)) {
+            const sName = studentsDB[idx]?.name || '';
+            showConfirmModal("Xóa học sinh", `Bạn có chắc chắn muốn xóa học sinh ${sName}?`, () => {
                 studentsDB.splice(idx, 1);
                 syncStudentsToStorage();
                 renderStudentsTable();
-                showToast("Đã xóa học sinh", "info");
-            }
+                showToast("Đã xóa học sinh khỏi hệ thống", "info");
+            });
         }
 
-        function clearAllStudents() {
-            if (confirm("XÁC NHẬN: Bạn có chắc chắn muốn xóa TOÀN BỘ danh sách học sinh?")) {
+        function confirmClearAllStudents() {
+            showConfirmModal("Xóa toàn bộ", "Bạn có chắc chắn muốn xóa TOÀN BỘ danh sách học sinh?", () => {
                 studentsDB = [];
                 syncStudentsToStorage();
                 renderStudentsTable();
-                showToast("Đã xóa toàn bộ danh sách học sinh", "warning");
-            }
+                showToast("Đã xóa toàn bộ học sinh!", "warning");
+            });
         }
 
-        function resetDemoStudents() {
-            studentsDB = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
-            syncStudentsToStorage();
-            renderStudentsTable();
-            showToast("Đã khôi phục danh sách học sinh mẫu", "success");
+        function confirmResetDemoStudents() {
+            showConfirmModal("Khôi phục mẫu", "Khôi phục lại 5 học sinh mẫu mặc định?", () => {
+                studentsDB = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+                syncStudentsToStorage();
+                renderStudentsTable();
+                renderGatekeeperPresets();
+                showToast("Đã nạp 5 học sinh mẫu mặc định!", "success");
+            });
         }
 
         function openBatchStudentModal() {
@@ -2014,6 +2114,7 @@ function doPost(e) {
                     if (!studentsDB.some(s => s.id === id)) {
                         studentsDB.push({
                             id, name, class: className, pass,
+                            isFirstLogin: pass === '123456',
                             avatar: `https://placehold.co/100x100/10b981/ffffff?text=${encodeURIComponent(name.substring(0,2).toUpperCase())}`
                         });
                         count++;
@@ -2142,7 +2243,7 @@ function doPost(e) {
             let earnedPoints = 0;
 
             activeExamData.questions.forEach(q => {
-                totalPossiblePoints += q.points;
+                totalPossiblePoints += (q.points || 0);
                 const correctIds = q.options ? q.options.filter(o => o.isCorrect).map(o => o.id).sort() : [];
                 const userArr = (playerAnswers[q.id] || []).sort();
 
@@ -2152,18 +2253,20 @@ function doPost(e) {
             });
 
             const percentage = totalPossiblePoints > 0 ? Math.round((earnedPoints / totalPossiblePoints) * 100) : 0;
-            const statusStr = percentage >= (activeExamData.passingScorePercent || 60) ? "ĐẠT" : "CHƯA ĐẠT";
+            const isPassed = percentage >= (activeExamData.passingScorePercent || 60);
 
             const resultEntry = {
-                timestamp: new Date().toLocaleString('vi-VN'),
-                studentId: currentStudent ? currentStudent.id : "GUEST",
+                action: 'saveExamResult',
+                submitTime: new Date().toLocaleString('vi-VN'),
+                studentCode: currentStudent ? currentStudent.id : "GUEST",
                 studentName: currentStudent ? currentStudent.name : "Thí sinh Khách",
                 studentClass: currentStudent ? currentStudent.class : "N/A",
                 testTitle: activeExamData.title,
                 score: earnedPoints,
                 totalPoints: totalPossiblePoints,
                 percentage: percentage,
-                status: statusStr,
+                passed: isPassed,
+                status: isPassed ? "ĐẠT" : "CHƯA ĐẠT",
                 timeTakenSeconds: timeTakenSecs
             };
 
@@ -2201,7 +2304,7 @@ function doPost(e) {
             const alertBadge = document.getElementById('result-gsheet-sync-alert');
             if (gscriptURL && gscriptURL.startsWith('http')) {
                 alertBadge.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800";
-                alertBadge.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-base"></i> ✅ Kết quả đã được tự động lưu về Google Sheet của Giáo viên!`;
+                alertBadge.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-base"></i> ✅ Kết quả đã được tự động phát về Google Sheet!`;
             } else {
                 alertBadge.className = "p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
                 alertBadge.innerHTML = `<i class="fa-solid fa-circle-info text-base"></i> Kết quả được lưu trực tiếp tại trình duyệt (Chưa cấu hình Google Sheet).`;
@@ -2239,13 +2342,13 @@ function doPost(e) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition";
                 tr.innerHTML = `
-                    <td class="py-2.5 px-3 text-slate-500 font-mono">${h.timestamp}</td>
-                    <td class="py-2.5 px-3 font-bold text-brand-600 dark:text-brand-400">${h.studentId}</td>
+                    <td class="py-2.5 px-3 text-slate-500 font-mono">${h.submitTime || h.timestamp}</td>
+                    <td class="py-2.5 px-3 font-bold text-brand-600 dark:text-brand-400">${h.studentCode || h.studentId}</td>
                     <td class="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-100">${h.studentName}</td>
                     <td class="py-2.5 px-3 font-semibold text-slate-600 dark:text-slate-300">${h.studentClass}</td>
                     <td class="py-2.5 px-3 font-bold text-slate-800 dark:text-slate-100">${h.score} / ${h.totalPoints}</td>
                     <td class="py-2.5 px-3 font-extrabold ${h.percentage >= 60 ? 'text-emerald-600' : 'text-red-500'}">${h.percentage}%</td>
-                    <td class="py-2.5 px-3 font-bold ${gscriptURL ? 'text-emerald-600' : 'text-slate-400'}">${gscriptURL ? 'Đã gửi GS' : 'Lưu Local'}</td>
+                    <td class="py-2.5 px-3 font-bold ${gscriptURL ? 'text-emerald-600' : 'text-slate-400'}">${gscriptURL ? 'Đã phát GS' : 'Lưu Local'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2254,7 +2357,7 @@ function doPost(e) {
         function exportResultsCSV() {
             let csv = "\uFEFFThời_Gian,Mã_HS,Họ_và_Tên,Lớp,Bài_Thi,Điểm_Số,Tổng_Điểm,Tỷ_Lệ(%),Trạng_Thái\n";
             examHistory.forEach(h => {
-                csv += `"${h.timestamp}","${h.studentId}","${h.studentName}","${h.studentClass}","${h.testTitle}",${h.score},${h.totalPoints},${h.percentage},"${h.status}"\n`;
+                csv += `"${h.submitTime || h.timestamp}","${h.studentCode || h.studentId}","${h.studentName}","${h.studentClass}","${h.testTitle}",${h.score},${h.totalPoints},${h.percentage},"${h.status}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -2300,7 +2403,7 @@ function doPost(e) {
                     renderMainWorkspace();
                     renderRightPanel();
                     triggerAutoSave();
-                    showToast("Nhập đề JSON thành công!", "success");
+                    showToast("Nhập đề thi JSON thành công!", "success");
                 } catch(err) {
                     showToast("File JSON không đúng cấu trúc!", "error");
                 }

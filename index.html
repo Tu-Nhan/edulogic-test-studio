@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduLogic Test Studio - Hệ Thống Đề Thi & Đồng Bộ Google Sheet</title>
+    <title>EduLogic Test Studio - Nền Tảng Đề Thi & Đồng Bộ Google Sheet</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -27,6 +27,13 @@
                             500: '#10b981',
                             600: '#059669',
                             700: '#047857',
+                        },
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
                         },
                         slate: {
                             850: '#172033',
@@ -82,7 +89,7 @@
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                     EduLogic <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-emerald-400">Test Studio</span>
                 </h1>
-                <p class="text-slate-400 text-xs sm:text-sm max-w-md mx-auto">Nền tảng kiểm tra trực tuyến & Đồng bộ kết quả tự động về Google Sheet.</p>
+                <p class="text-slate-400 text-xs sm:text-sm max-w-md mx-auto">Nền tảng kiểm tra trực tuyến & Đồng bộ dữ liệu 2 chiều với Google Sheet.</p>
             </div>
 
             <!-- Portal Selection Cards -->
@@ -99,7 +106,7 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Đăng Nhập Làm Bài Thi</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Dành cho học sinh làm bài thi theo mã số được cấp.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Nhập Mã số học sinh và Mật khẩu được cấp để làm bài.</p>
                         </div>
 
                         <form onsubmit="handleStudentPortalLogin(event)" class="space-y-4 pt-2">
@@ -145,7 +152,7 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Bảng Điều Khiển Giáo Viên</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Biên soạn đề thi, nhập từ Word, cấu hình Google Sheet & quản lý học sinh.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Biên soạn đề thi, nhập từ Word, đồng bộ Google Sheet & quản lý học sinh.</p>
                         </div>
 
                         <form onsubmit="handleTeacherPortalLogin(event)" class="space-y-4 pt-2">
@@ -174,9 +181,8 @@
 
             </div>
 
-            <!-- Footer info -->
             <div class="text-center text-[11px] text-slate-500">
-                EduLogic Test Studio Pro &bull; Tích hợp tự động hóa Google Apps Script Client-side
+                EduLogic Test Studio Pro &bull; Tự động hóa kết nối 2 chiều Google Apps Script
             </div>
         </div>
     </div>
@@ -198,7 +204,7 @@
                         <h1 class="font-extrabold text-slate-900 dark:text-white leading-tight flex items-center gap-1.5">
                             EduLogic <span id="app-mode-badge" class="text-brand-600 dark:text-brand-400 text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 bg-brand-50 dark:bg-brand-900/40 rounded-full border border-brand-200 dark:border-brand-700">Studio</span>
                         </h1>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Hệ thống tạo đề & Đồng bộ kết quả</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Hệ thống đề thi & Đồng bộ dữ liệu</p>
                     </div>
                 </div>
 
@@ -220,8 +226,6 @@
 
             <!-- Header Action Controls -->
             <div class="flex items-center gap-2">
-                
-                <!-- User Avatar / Role Info Badge -->
                 <div id="user-profile-badge" class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-600">
                     <img id="header-user-avatar" src="https://placehold.co/100x100/4f46e5/ffffff?text=GV" alt="Avatar" class="w-6 h-6 rounded-full object-cover">
                     <div class="text-left leading-tight hidden sm:block">
@@ -230,13 +234,11 @@
                     </div>
                 </div>
 
-                <!-- Dark Mode Toggle -->
                 <button id="theme-toggle-btn" onclick="toggleDarkMode()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center transition">
                     <i class="fa-solid fa-moon dark:hidden"></i>
                     <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
                 </button>
 
-                <!-- Logout / Switch Account Button -->
                 <button onclick="returnToPortal()" class="px-3 py-1.5 text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-red-500 hover:text-white text-slate-700 dark:text-slate-200 rounded-xl transition flex items-center gap-1.5" title="Đăng xuất / Đổi tài khoản">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span class="hidden md:inline">Đăng Xuất</span>
@@ -273,7 +275,6 @@
             
             <!-- TAB 1: TEST CREATOR WORKSPACE -->
             <div id="panel-creator" class="h-full flex overflow-hidden">
-                <!-- Question List Sidebar -->
                 <aside class="w-80 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 flex flex-col shrink-0 shadow-sm">
                     <div class="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
@@ -281,7 +282,6 @@
                             <span id="question-count-badge" class="px-2 py-0.5 text-xs font-extrabold bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 rounded-full">0</span>
                         </div>
 
-                        <!-- Add Question Dropdown -->
                         <div class="relative group">
                             <button class="px-2.5 py-1.5 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white rounded-xl flex items-center gap-1 transition shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Thêm câu hỏi
@@ -309,7 +309,6 @@
                     <div id="question-list" class="flex-1 overflow-y-auto p-2 space-y-2"></div>
                 </aside>
 
-                <!-- Active Question Detail Editor -->
                 <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 dark:bg-slate-900">
                     <div id="workspace-content" class="max-w-3xl mx-auto space-y-6"></div>
                 </main>
@@ -329,7 +328,6 @@
                             </div>
                         </div>
 
-                        <!-- Drag Drop Zone -->
                         <div id="drag-drop-area" 
                             ondragover="handleDragOver(event)" 
                             ondragleave="handleDragLeave(event)" 
@@ -348,7 +346,6 @@
                             </label>
                         </div>
 
-                        <!-- Paste Raw Text Field -->
                         <div class="space-y-2 pt-2">
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Hoặc Dán văn bản thô vào đây:</label>
                             <textarea id="import-text-input" rows="5" 
@@ -361,7 +358,6 @@
                         </div>
                     </div>
 
-                    <!-- Parsed Preview Checklist -->
                     <div id="import-preview-section" class="hidden bg-white dark:bg-slate-850 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -408,7 +404,7 @@
                         <div class="bg-white dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
                             <div>
                                 <p class="text-xs font-bold text-slate-500 uppercase">Trạng thái dữ liệu</p>
-                                <h3 class="text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1 flex items-center gap-1.5">
+                                <h3 id="stat-data-status-text" class="text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-1 flex items-center gap-1.5">
                                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Đồng bộ LocalStorage
                                 </h3>
                             </div>
@@ -418,7 +414,7 @@
                         </div>
                     </div>
 
-                    <!-- Toolbar & Actions -->
+                    <!-- Toolbar & Actions (INCLUDES THE NEW GOOGLE SHEET SYNC BUTTON) -->
                     <div class="bg-white dark:bg-slate-850 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                             
@@ -437,6 +433,10 @@
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="syncStudentsFromGoogleSheet()" class="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5" title="Tải danh sách tài khoản học sinh từ Google Sheet">
+                                    <i class="fa-solid fa-rotate"></i> 🔄 Đồng bộ từ Google Sheet
+                                </button>
+
                                 <button onclick="openAddStudentModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-user-plus"></i> Thêm Học Sinh
                                 </button>
@@ -490,7 +490,7 @@
             <div id="panel-settings" class="hidden h-full overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900">
                 <div class="max-w-4xl mx-auto space-y-6">
                     
-                    <!-- CARD 1: GOOGLE SHEET API CONFIGURATION (FEATURED) -->
+                    <!-- CARD 1: GOOGLE SHEET API CONFIGURATION -->
                     <div class="bg-white dark:bg-slate-850 p-6 rounded-2xl border border-emerald-500/30 dark:border-emerald-500/20 shadow-md space-y-5 relative overflow-hidden">
                         <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
                         
@@ -500,13 +500,13 @@
                                     <i class="fa-file-excel"></i>
                                 </div>
                                 <div>
-                                    <h2 class="font-extrabold text-slate-900 dark:text-white text-base">Cấu hình Tự Động Đồng Bộ về Google Sheet</h2>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Tự động đẩy Điểm số, Mã HS, Lớp và Thời gian nộp bài của học sinh về Google Sheet qua Apps Script Web App.</p>
+                                    <h2 class="font-extrabold text-slate-900 dark:text-white text-base">Cấu hình Đồng Bộ 2 Chiều với Google Sheet</h2>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Lấy danh sách học sinh từ Sheet (doGet) và Tự động đẩy kết quả thi học sinh về Sheet (doPost).</p>
                                 </div>
                             </div>
 
                             <button onclick="openGScriptInstructionsModal()" class="px-3.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs rounded-xl hover:bg-emerald-100 transition flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800">
-                                <i class="fa-solid fa-code"></i> Hướng dẫn tạo Apps Script
+                                <i class="fa-solid fa-code"></i> Mã Apps Script 2 Chiều
                             </button>
                         </div>
 
@@ -632,7 +632,6 @@
         <div id="student-portal-view" class="hidden flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 dark:bg-slate-900">
             <div class="max-w-3xl mx-auto space-y-6">
                 
-                <!-- Welcome Banner -->
                 <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div class="space-y-2 text-center sm:text-left">
                         <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[11px] font-extrabold uppercase tracking-wider">Cổng Thi Trực Tuyến</span>
@@ -645,7 +644,6 @@
                     </div>
                 </div>
 
-                <!-- Assigned Test Details Card -->
                 <div class="bg-white dark:bg-slate-850 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-md space-y-6">
                     <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
                         <div>
@@ -729,7 +727,6 @@
                     
                     <div id="result-student-profile-banner" class="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600 text-left gap-4"></div>
 
-                    <!-- Google Sheet Sync Status Alert Badge on Result Page -->
                     <div id="result-gsheet-sync-alert" class="p-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm"></div>
 
                     <div class="space-y-2">
@@ -789,69 +786,6 @@
                 <input type="hidden" id="student-edit-index" value="-1">
 
                 <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mã Học Sinh *</label>
-                    <input type="text" id="form-student-id" required placeholder="Ví dụ: HS006" 
-                        class="w-full px-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 uppercase outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Họ và Tên *</label>
-                    <input type="text" id="form-student-name" required placeholder="Ví dụ: Nguyễn Văn Minh" 
-                        class="w-full px-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Lớp *</label>
-                    <input type="text" id="form-student-class" required placeholder="Ví dụ: 12A1" 
-                        class="w-full px-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-
-                <div>
-                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mật Khẩu *</label>
-                    <input type="text" id="form-student-pass" required placeholder="••••••••" value="123456" 
-                        class="w-full px-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-
-                <div class="pt-2 flex items-center justify-end gap-2">
-                    <button type="button" onclick="closeStudentModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-200 font-bold rounded-xl">Hủy</button>
-                    <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow">Lưu thông tin</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 2: BATCH IMPORT STUDENTS (CSV / PASTE) -->
-    <div id="student-batch-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <h3 class="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv text-emerald-600"></i> Nhập danh sách Học sinh hàng loạt
-                </h3>
-                <button onclick="closeBatchStudentModal()" class="text-slate-400 hover:text-slate-600 text-base"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="p-6 space-y-4 text-xs">
-                <p class="text-slate-600 dark:text-slate-300">
-                    Dán danh sách học sinh theo định dạng: <code>Mã_HS, Họ_và_Tên, Lớp, Mật_Khẩu</code> (mỗi học sinh một dòng) hoặc tải file .csv.
-                </p>
-
-                <textarea id="batch-student-input" rows="6" 
-                    placeholder="HS006, Trần Văn Nam, 12A3, 123456&#10;HS007, Lê Thị Mai, 12A3, 123456"
-                    class="w-full p-3 font-mono rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-brand-500"></textarea>
-
-                <div class="flex items-center justify-between">
-                    <button onclick="downloadCSVTemplate()" class="text-brand-600 dark:text-brand-400 font-bold hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-download"></i> Tải file CSV mẫu
-                    </button>
-
-                    <button onclick="processBatchStudents()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition">
-                        Phân tích & Thêm vào hệ thống
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL 3: GOOGLE APPS SCRIPT INSTRUCTIONS & CODE TEMPLATE -->
     <div id="gscript-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -864,25 +798,70 @@
 
             <div class="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 dark:text-slate-300">
                 <ol class="list-decimal pl-4 space-y-2 font-medium">
-                    <li>Mở file Google Sheet của bạn trên Google Drive.</li>
+                    <li>Mở file Google Sheet của bạn trên Google Drive (Tạo 2 tab: <code>DanhSachHocSinh</code> và <code>KetQuaBaiThi</code>).</li>
                     <li>Vào menu: <strong>Tiện ích mở rộng (Extensions)</strong> &rarr; <strong>Apps Script</strong>.</li>
                     <li>Xóa toàn bộ mã cũ và dán đoạn mã bên dưới vào biên tập viên:</li>
                 </ol>
 
                 <div class="relative group">
-                    <pre id="gscript-code-block" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">function doPost(e) {
+                    <pre id="gscript-code-block" class="p-4 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">// 1. Tải danh sách Học sinh từ Google Sheet về WebApp (dùng cho Đăng nhập & Đồng bộ)
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("DanhSachHocSinh") || ss.getSheets()[0];
+  var data = sheet.getDataRange().getValues();
+  var students = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      students.push({
+        id: String(data[i][0]).trim().toUpperCase(),
+        name: String(data[i][1]).trim(),
+        class: String(data[i][2]).trim(),
+        pass: String(data[i][3]).trim(),
+        isFirstLogin: data[i][4] !== undefined ? Boolean(data[i][4]) : (String(data[i][3]).trim() === '123456')
+      });
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(students))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// 2. Xử lý lưu kết quả thi & cập nhật mật khẩu học sinh
+function doPost(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
     var data = JSON.parse(e.postData.contents);
-    
-    // Tạo hàng tiêu đề nếu trang tính còn trống
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(["Thời gian nộp", "Mã Học Sinh", "Họ và Tên", "Lớp", "Tên Bài Thi", "Điểm Số", "Tỷ Lệ (%)", "Trạng Thái"]);
+    var action = data.action || 'saveExamResult';
+
+    // ACTION A: Cập nhật mật khẩu mới của Học sinh vào Sheet DanhSachHocSinh
+    if (action === 'updateStudentPass') {
+      var sheet = ss.getSheetByName("DanhSachHocSinh") || ss.getSheets()[0];
+      var values = sheet.getDataRange().getValues();
+      var targetId = String(data.studentId).trim().toUpperCase();
+      var updated = false;
+
+      for (var i = 1; i < values.length; i++) {
+        if (String(values[i][0]).trim().toUpperCase() === targetId) {
+          sheet.getRange(i + 1, 4).setValue(data.newPassword); // Cột D: Mật khẩu
+          sheet.getRange(i + 1, 5).setValue(false);              // Cột E: isFirstLogin (false)
+          updated = true;
+          break;
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: "success", updated: updated}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ACTION B: Lưu kết quả làm bài vào Sheet KetQuaBaiThi
+    var sheetResults = ss.getSheetByName("KetQuaBaiThi");
+    if (!sheetResults) {
+      sheetResults = ss.insertSheet("KetQuaBaiThi");
+      sheetResults.appendRow(["Thời gian nộp", "Mã Học Sinh", "Họ và Tên", "Lớp", "Tên Bài Thi", "Điểm Số", "Tỷ Lệ (%)", "Trạng Thái"]);
     }
     
-    // Ghi dữ liệu lượt thi của học sinh
-    sheet.appendRow([
-      new Date().toLocaleString("vi-VN"),
+    sheetResults.appendRow([
+      data.timestamp || new Date().toLocaleString("vi-VN"),
       data.studentId || "N/A",
       data.studentName || "Thí sinh Khách",
       data.studentClass || "N/A",
@@ -892,10 +871,10 @@
       data.status
     ]);
     
-    return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
+    return ContentService.createTextOutput(JSON.stringify({status: "success"}))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({"result": "error", "message": error.toString()}))
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.toString()}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }</pre>
@@ -914,6 +893,45 @@
             <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-right">
                 <button onclick="closeGScriptModal()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow">Đã hiểu</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: MANDATORY FIRST-TIME PASSWORD CHANGE -->
+    <div id="change-password-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-850 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-md overflow-hidden space-y-4 p-6 sm:p-8">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-xl">Đổi Mật Khẩu Lần Đầu</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Vì lý do bảo mật, vui lòng tạo mật khẩu mới cho tài khoản của bạn trước khi làm bài thi.</p>
+            </div>
+
+            <form onsubmit="handleConfirmFirstPasswordChange(event)" class="space-y-4 pt-2 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Mật Khẩu Mới *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-400"></i>
+                        <input type="password" id="new-first-pass" required placeholder="Tối thiểu 6 ký tự" minlength="6"
+                            class="w-full pl-9 pr-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1 uppercase">Xác Nhận Mật Khẩu Mới *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-shield-halved absolute left-3.5 top-3 text-slate-400"></i>
+                        <input type="password" id="confirm-first-pass" required placeholder="Nhập lại mật khẩu mới" minlength="6"
+                            class="w-full pl-9 pr-3 py-2.5 font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-amber-600/30 transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> Cập Nhật & Vào Làm Bài
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -940,11 +958,11 @@
         // ==========================================
 
         const DEFAULT_STUDENTS = [
-            { id: 'HS001', name: 'Nguyễn Văn An', class: '12A1', pass: '123456', avatar: 'https://placehold.co/100x100/4f46e5/ffffff?text=AN' },
-            { id: 'HS002', name: 'Trần Thị Bích', class: '12A1', pass: '123456', avatar: 'https://placehold.co/100x100/10b981/ffffff?text=BICH' },
-            { id: 'HS003', name: 'Lê Hoàng Cường', class: '12A2', pass: '123456', avatar: 'https://placehold.co/100x100/f59e0b/ffffff?text=CUONG' },
-            { id: 'HS004', name: 'Phạm Minh Đức', class: '12A2', pass: '123456', avatar: 'https://placehold.co/100x100/ec4899/ffffff?text=DUC' },
-            { id: 'HS005', name: 'Vũ Phương Thảo', class: '12A3', pass: '123456', avatar: 'https://placehold.co/100x100/8b5cf6/ffffff?text=THAO' }
+            { id: 'HS001', name: 'Nguyễn Văn An', class: '12A1', pass: '123456', isFirstLogin: true, avatar: 'https://placehold.co/100x100/4f46e5/ffffff?text=AN' },
+            { id: 'HS002', name: 'Trần Thị Bích', class: '12A1', pass: '123456', isFirstLogin: true, avatar: 'https://placehold.co/100x100/10b981/ffffff?text=BICH' },
+            { id: 'HS003', name: 'Lê Hoàng Cường', class: '12A2', pass: '123456', isFirstLogin: true, avatar: 'https://placehold.co/100x100/f59e0b/ffffff?text=CUONG' },
+            { id: 'HS004', name: 'Phạm Minh Đức', class: '12A2', pass: '123456', isFirstLogin: true, avatar: 'https://placehold.co/100x100/ec4899/ffffff?text=DUC' },
+            { id: 'HS005', name: 'Vũ Phương Thảo', class: '12A3', pass: '123456', isFirstLogin: true, avatar: 'https://placehold.co/100x100/8b5cf6/ffffff?text=THAO' }
         ];
 
         const SAMPLE_TEST = {
@@ -1114,6 +1132,79 @@
             showToast("Đã sao chép mã Google Apps Script vào Clipboard!", "success");
         }
 
+        // FETCH STUDENTS FROM GOOGLE SHEET (doGet)
+        async function syncStudentsFromGoogleSheet() {
+            if (!gscriptURL || !gscriptURL.startsWith('http')) {
+                showToast("Chưa kết nối URL Google Apps Script! Vui lòng vào Tab 4 để cấu hình.", "warning");
+                switchTeacherTab('settings');
+                return;
+            }
+
+            const btn = document.getElementById('btn-sync-gsheet-students');
+            const icon = document.getElementById('icon-sync-gsheet-students');
+
+            if (btn) btn.disabled = true;
+            if (icon) icon.classList.add('animate-spin');
+
+            showToast("Đang kết nối & tải danh sách học sinh từ Google Sheet...", "info");
+
+            try {
+                const response = await fetch(gscriptURL);
+                if (!response.ok) {
+                    throw new Error(`Mã lỗi HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    let updatedCount = 0;
+                    data.forEach(item => {
+                        const id = (item.code || item.id || item.ma_hs || '').toString().trim().toUpperCase();
+                        const name = (item.name || item.ho_ten || '').toString().trim();
+                        const className = (item.className || item.class || item.lop || '12A1').toString().trim();
+                        const pass = (item.pass || item.mat_khau || '123456').toString().trim();
+
+                        if (id && name) {
+                            const existingIdx = studentsDB.findIndex(s => s.id === id);
+                            const studentObj = {
+                                id,
+                                name,
+                                class: className,
+                                pass,
+                                avatar: `https://placehold.co/100x100/10b981/ffffff?text=${encodeURIComponent(name.substring(0,2).toUpperCase())}`
+                            };
+
+                            if (existingIdx !== -1) {
+                                studentsDB[existingIdx] = studentObj;
+                            } else {
+                                studentsDB.push(studentObj);
+                            }
+                            updatedCount++;
+                        }
+                    });
+
+                    syncStudentsToStorage();
+                    renderStudentsTable();
+                    renderGatekeeperPresets();
+
+                    const dataStatusEl = document.getElementById('stat-data-status-text');
+                    if (dataStatusEl) {
+                        dataStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span> Đồng bộ Google Sheet`;
+                    }
+
+                    showToast(`Đồng bộ thành công ${updatedCount} học sinh từ Google Sheet!`, "success");
+                } else {
+                    showToast("Google Sheet trả về danh sách trống hoặc không đúng định dạng!", "warning");
+                }
+            } catch (err) {
+                console.error("Lỗi tải danh sách từ Google Sheet:", err);
+                showToast("Không thể tải danh sách từ Google Sheet. Hãy kiểm tra lại quyền truy cập Web App (Anyone)!", "error");
+            } finally {
+                if (btn) btn.disabled = false;
+                if (icon) icon.classList.remove('animate-spin');
+            }
+        }
+
+        // SEND EXAM RESULTS TO GOOGLE SHEET (doPost)
         async function sendPayloadToGoogleSheet(payload) {
             if (!gscriptURL || !gscriptURL.startsWith('http')) {
                 return { success: false, reason: "NO_URL" };
@@ -1165,6 +1256,8 @@
         // 5. GATEKEEPER & CONTROLLER
         // ==========================================
 
+        let pendingChangePassStudent = null;
+
         function renderGatekeeperPresets() {
             const container = document.getElementById('gk-quick-students');
             if (!container) return;
@@ -1189,6 +1282,15 @@
 
             const found = studentsDB.find(s => s.id === id && s.pass === pass);
             if (found) {
+                // Kiểm tra nếu đăng nhập lần đầu hoặc mật khẩu đang là '123456'
+                if (found.isFirstLogin || found.pass === '123456') {
+                    pendingChangePassStudent = found;
+                    document.getElementById('new-first-pass').value = '';
+                    document.getElementById('confirm-first-pass').value = '';
+                    document.getElementById('change-password-modal').classList.remove('hidden');
+                    return;
+                }
+
                 authRole = 'student';
                 currentStudent = found;
                 localStorage.setItem('edulogic_active_student', JSON.stringify(found));
@@ -1196,6 +1298,52 @@
                 enterMainAppScreen();
             } else {
                 showToast("Mã học sinh hoặc Mật khẩu không chính xác!", "error");
+            }
+        }
+
+        async function handleConfirmFirstPasswordChange(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('new-first-pass').value.trim();
+            const confirmPass = document.getElementById('confirm-first-pass').value.trim();
+
+            if (newPass !== confirmPass) {
+                showToast("Xác nhận mật khẩu mới không khớp!", "error");
+                return;
+            }
+            if (newPass === '123456') {
+                showToast("Mật khẩu mới không được trùng với mật khẩu mặc định!", "warning");
+                return;
+            }
+
+            if (pendingChangePassStudent) {
+                pendingChangePassStudent.pass = newPass;
+                pendingChangePassStudent.isFirstLogin = false;
+
+                const matchInDB = studentsDB.find(s => s.id === pendingChangePassStudent.id);
+                if (matchInDB) {
+                    matchInDB.pass = newPass;
+                    matchInDB.isFirstLogin = false;
+                }
+
+                syncStudentsToStorage();
+
+                // Gửi cập nhật mật khẩu về Google Sheet qua API
+                if (gscriptURL && gscriptURL.startsWith('http')) {
+                    sendPayloadToGoogleSheet({
+                        action: 'updateStudentPass',
+                        studentId: pendingChangePassStudent.id,
+                        newPassword: newPass
+                    });
+                }
+
+                authRole = 'student';
+                currentStudent = pendingChangePassStudent;
+                localStorage.setItem('edulogic_active_student', JSON.stringify(pendingChangePassStudent));
+
+                document.getElementById('change-password-modal').classList.add('hidden');
+                showToast("Đã đổi mật khẩu thành công & cập nhật lên Google Sheet!", "success");
+                pendingChangePassStudent = null;
+                enterMainAppScreen();
             }
         }
 
@@ -1611,6 +1759,59 @@
         // 9. STUDENT MANAGEMENT MODULE
         // ==========================================
 
+        async function syncStudentsFromGoogleSheet() {
+            if (!gscriptURL || !gscriptURL.startsWith('http')) {
+                showToast("Vui lòng gắn URL Google Apps Script ở Tab 4 trước!", "warning");
+                return;
+            }
+
+            showToast("Đang tải danh sách học sinh từ Google Sheet...", "info");
+
+            try {
+                const res = await fetch(gscriptURL);
+                const data = await res.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    let importedCount = 0;
+                    data.forEach(item => {
+                        const sId = (item.id || item.code || item.ma_hs || '').toString().trim().toUpperCase();
+                        const sName = (item.name || item.ho_ten || '').toString().trim();
+                        const sClass = (item.class || item.className || item.lop || '12A1').toString().trim();
+                        const sPass = (item.pass || item.mat_khau || '123456').toString().trim();
+                        const isFirst = item.isFirstLogin !== undefined ? Boolean(item.isFirstLogin) : (sPass === '123456');
+
+                        if (sId && sName) {
+                            const existingIdx = studentsDB.findIndex(s => s.id === sId);
+                            const studentObj = {
+                                id: sId,
+                                name: sName,
+                                class: sClass,
+                                pass: sPass,
+                                isFirstLogin: isFirst,
+                                avatar: `https://placehold.co/100x100/4f46e5/ffffff?text=${encodeURIComponent(sName.substring(0,2).toUpperCase())}`
+                            };
+
+                            if (existingIdx !== -1) {
+                                studentsDB[existingIdx] = studentObj;
+                            } else {
+                                studentsDB.push(studentObj);
+                                importedCount++;
+                            }
+                        }
+                    });
+
+                    syncStudentsToStorage();
+                    renderStudentsTable();
+                    showToast(`Đã đồng bộ ${data.length} học sinh từ Google Sheet!`, "success");
+                } else {
+                    showToast("Không tìm thấy dữ liệu học sinh trong sheet DanhSachHocSinh", "warning");
+                }
+            } catch (err) {
+                console.error("Sync Error:", err);
+                showToast("Lỗi kết nối tải dữ liệu từ Google Sheet!", "error");
+            }
+        }
+
         function renderStudentsTable() {
             const tbody = document.getElementById('students-table-body');
             const emptyState = document.getElementById('students-empty-state');
@@ -1646,7 +1847,10 @@
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/60 transition";
                     tr.innerHTML = `
-                        <td class="py-3 px-4 font-bold text-brand-600 dark:text-brand-400 uppercase">${s.id}</td>
+                        <td class="py-3 px-4 font-bold text-brand-600 dark:text-brand-400 uppercase flex items-center gap-1.5">
+                            ${s.id}
+                            ${s.isFirstLogin ? '<span class="w-2 h-2 rounded-full bg-amber-500" title="Chưa đổi mật khẩu lần đầu"></span>' : ''}
+                        </td>
                         <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                             <img src="${s.avatar || 'https://placehold.co/100x100/4f46e5/ffffff?text=HS'}" class="w-7 h-7 rounded-full object-cover">
                             ${s.name}
@@ -1660,6 +1864,7 @@
                         </td>
                         <td class="py-3 px-4 text-center">
                             <div class="flex items-center justify-center gap-1">
+                                <button onclick="resetStudentPassword(${originalIdx})" class="w-7 h-7 rounded-lg hover:bg-amber-100 text-amber-600 dark:hover:bg-amber-950/60" title="Reset Mật khẩu về 123456"><i class="fa-solid fa-key"></i></button>
                                 <button onclick="openEditStudentModal(${originalIdx})" class="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                                 <button onclick="deleteStudent(${originalIdx})" class="w-7 h-7 rounded-lg hover:bg-red-100 text-red-500" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
@@ -1667,6 +1872,31 @@
                     `;
                     tbody.appendChild(tr);
                 });
+            }
+        }
+
+        async function resetStudentPassword(idx) {
+            const s = studentsDB[idx];
+            if (!s) return;
+
+            if (confirm(`Bạn có chắc chắn muốn RESET mật khẩu của học sinh "${s.name}" (${s.id}) về mặc định "123456"?`)) {
+                s.pass = '123456';
+                s.isFirstLogin = true;
+
+                syncStudentsToStorage();
+                renderStudentsTable();
+
+                // Đồng bộ thay đổi mật khẩu về Google Sheet
+                if (gscriptURL && gscriptURL.startsWith('http')) {
+                    sendPayloadToGoogleSheet({
+                        action: 'updateStudentPass',
+                        studentId: s.id,
+                        newPassword: '123456'
+                    });
+                    showToast(`Đã reset mật khẩu ${s.id} về 123456 & đồng bộ lên Google Sheet!`, "success");
+                } else {
+                    showToast(`Đã reset mật khẩu ${s.id} về 123456 trong LocalStorage!`, "info");
+                }
             }
         }
 
@@ -1940,7 +2170,6 @@
             examHistory.unshift(resultEntry);
             localStorage.setItem('edulogic_exam_history', JSON.stringify(examHistory));
 
-            // AUTOMATIC GOOGLE SHEET SYNC TRIGGER
             let syncSuccess = false;
             if (gscriptURL && gscriptURL.startsWith('http')) {
                 const res = await sendPayloadToGoogleSheet(resultEntry);
